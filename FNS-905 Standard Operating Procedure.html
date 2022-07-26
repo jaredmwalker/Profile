@@ -1581,10 +1581,14 @@ div.tocify {
 FNS 905 Summer Site-Finder Report
 </center></h1>
 <h4 class="author"><center>
+Child Nutrition Programs
+</center></h4>
+<h4 class="author"><center>
 Jared Walker
-<center></h4>
+</center></h4>
 <h4 class="date"><center>
-<center></h4>
+Updated 7/26/2022
+</center></h4>
 
 </div>
 
@@ -1599,42 +1603,49 @@ div#TOC li {
     color: #C9C9C9;
     font-weight: light;
 }
-
 body{ /* Normal*/
     font-size: 16px;
-    font-family: "Century Gothic", sans serif;;
+    font-family: "Century Gothic", sans serif;
 }
-
 td {/* Table*/
     font-size: 14px;
-    font-family: "Century Gothic", sans serif;;
+    font-family: "Century Gothic", sans serif;
 }
 h1.title {
     font-size: 26px;
-    font-family: "Century Gothic", sans serif;;
+    line-height: 26px;
+    font-family: "Century Gothic", sans serif;
+}
+
+h2.subtitle em {
+    font-size: 22px;
+    line-height: 22px;
+    font-family: "Century Gothic", sans serif;
 }
 h1 { /* Header 1 */
     font-size: 20px;
-    font-family: "Century Gothic", sans serif;;
-
+    line-height: 12px;
+    font-family: "Century Gothic", sans serif;
 }
 h2 { /* Header 2 */
-    font-size: 20px;
-    font-family: "Century Gothic", sans serif;;
-
+    font-size: 17px;
+    line-height: 8px;
+    font-family: "Century Gothic", sans serif;
+    font-style: italic;
+    margin-left: 40px;
 }
 h3 { /* Header 3 */
-    font-size: 20px;
-    font-family: "Century Gothic", sans serif;;
-
+    font-size: 15px;
+    line-height: 3px;
+    font-family: "Century Gothic", sans serif;
+    font-style: italic;
+    margin-left: 80px;
 }
-
 code.r{ /* Code block */
     font-family: "Century Gothic", sans serif;
     color: #808080;
     font-size: 12px;
 }
-
 pre.r {line-height: 14px; 
 }
 
@@ -1657,11 +1668,10 @@ pre.r {line-height: 14px;
 </div>
 <div id="data-import-and-prep" class="section level1">
 <h1>2 - Data Import and Prep</h1>
-<div id="merge-lat-long" class="section level2">
-<h2>2.1 - Merge Lat &amp; Long</h2>
-<p>Note: When transitioning between school years, it may be necessary
-download both the new SY &amp; the previous SY of Data1027 &amp;
-Data1026.</p>
+<div id="merge-latitude-longitude" class="section level2">
+<h2>2.1 - Merge Latitude &amp; Longitude</h2>
+<p>When transitioning between school years, it may be necessary download
+both the new SY &amp; the previous SY of Data1027 &amp; Data1026.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import Previous submission, clean names, remove extraneous columns</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>list <span class="ot">&lt;-</span> <span class="fu">file.info</span>(<span class="fu">list.files</span>(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;P:/1_Internal/Reports/Summer/USDA 543a_FNS 905/2022_post COVID waivers&quot;</span>, </span>
@@ -1764,8 +1774,8 @@ Data1026.</p>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#         last_modified_date  = as.Date(format(last_modified_date), &quot;%m/%d/%Y&quot;))</span></span></code></pre></div>
 </div>
 </div>
-<div id="filter-inactive-sites" class="section level1">
-<h1>3 - Filter Inactive Sites</h1>
+<div id="filter-inactive-sites-by-date" class="section level1">
+<h1>3 - Filter Inactive Sites by Date</h1>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>active <span class="ot">&lt;-</span> all <span class="sc">%&gt;%</span> </span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(end_date_mm_dd_yy <span class="sc">&gt;=</span> <span class="fu">Sys.Date</span>() <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(start_date_mm_dd_yy <span class="sc">&lt;=</span> <span class="fu">Sys.Date</span>() <span class="sc">+</span> <span class="dv">30</span>)</span>
@@ -1919,11 +1929,23 @@ dates in Excel. Reformat column headers for viewing.</p>
 </div>
 <div id="add-worksheets" class="section level2">
 <h2>7.2 - Add Worksheets</h2>
+<div id="active-sites" class="section level3">
+<h3>7.2.1 - Active Sites</h3>
+</div>
+<div id="all-sites" class="section level3">
+<h3>7.2.2 - All Sites</h3>
+</div>
+<div id="sites-added" class="section level3">
+<h3>7.2.3 - Sites Added</h3>
+</div>
+<div id="sites-removed" class="section level3">
+<h3>7.2.4 - Sites Removed</h3>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add Worksheets to Workbook and Name</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">addWorksheet</span>(wb, <span class="fu">paste0</span>(<span class="st">&quot;Active Sites (&quot;</span>,nrow_active,<span class="st">&quot;)&quot;</span>))</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">addWorksheet</span>(wb, <span class="fu">paste0</span>(<span class="st">&quot;All Sites (&quot;</span>,nrow_all,<span class="st">&quot;)&quot;</span>))</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">addWorksheet</span>(wb, <span class="fu">paste0</span>(<span class="st">&quot;Added (&quot;</span>,nrow_added,<span class="st">&quot;)&quot;</span>))</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">addWorksheet</span>(wb, <span class="fu">paste0</span>(<span class="st">&quot;Removed (&quot;</span>,nrow_removed,<span class="st">&quot;)&quot;</span>))</span></code></pre></div>
+</div>
 </div>
 <div id="write-data" class="section level2">
 <h2>7.3 - Write Data</h2>
