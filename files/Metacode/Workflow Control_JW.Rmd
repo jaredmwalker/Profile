@@ -1,0 +1,123 @@
+---
+Title: "Data Cleaning"
+Project: "P-EBT 2022"
+Dept:   "Child Nutrition Programs"
+---
+
+# Set Up
+
+```{r set-up-run-once_per-session,include=FALSE }
+#options(max.print = 100)       # Limit output
+#options(scipen = 999)          # Prohibit scientific notation
+setUp <- function(x) {
+  gc() %>% print()              # Memory usage
+  rm(list=ls(all.name = T))     # Clear objects from workspace
+  gc() %>% print()              # Memory usage
+  #------------User information
+  .GlobalEnv$user <- " JW "
+  .GlobalEnv$destination <- "H:/Documents/" 
+  #----------- Import metadata 
+  source(r"(P:\1_Internal\Reports\CNP (all programs)\COVID-19\PEBT SY2022\R Operations\Workflow (source code)\1. Import Metadata.R)")
+}
+library(tidyverse)
+
+utrex[which(utrex==1619025),]
+View(utrex[which(utrex==1594426),])
+utrex[which(utrex==1619025),]
+utrex[which(utrex==1619025),]
+utrex[which(utrex==1619025),]
+
+
+
+which(utrex$ssid_number==1619025)
+
+utrex[753, ]
+
+
+names(utrex)
+
+
+```
+
+# Clean Data
+
+```{r include=FALSE}
+#--------------------------setUp function------------------------------------------------
+setUp()
+
+names(df)
+#-------------------------LEA name and file path -----------------------------------------
+LEA_Name <- "Test"
+Round <- "R3_S1" # "S2" / "Rec" / "ParApp" / "Rec"
+filename <- r"(P:\1_Internal\Reports\CNP (all programs)\COVID-19\PEBT SY2022\R Operations\Metadata\Header Reconciliation Files\Round 3.xlsx)"
+
+#-------------------------Run data cleaning program---------------------------------------
+
+source("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/R Operations/Workflow (source code)/3. Data_Clean_1_S2_R4.R")
+
+#------------------------ Save workbooks---------------------------------------------------
+
+saveWorkbook(wb, paste0(destination, Round, LEA_Name, " (all)", user, date, ".xlsx"), overwrite = T)
+
+ifelse((nbr_Errors > 0), 
+       saveWorkbook(errors, paste0(destination, Round, " ", LEA_Name, " (errors)", user, date, ".xlsx"),overwrite = T), print("ZERO ERRORS"))
+```
+
+# Performance benchmarks
+
+```{r}
+df$eligibility_date
+
+df <- df.r
+
+
+names(df)
+```
+
+```{r}
+Eligibility dates- 
+  Summer Round 2: 7/1/2021-8/1/2022 
+Parent App/R4: 7/1/2021-6/30/2022 Eligibility dates after....
+
+library(microbenchmark) 
+options(scipen = 0)
+
+# 1
+x <- runif(1e6)
+microbenchmark(sqrt(x), x^0.5)
+# 2
+x^(1 / 2)
+exp(log(x) / 2)
+# 3
+a <- system.time(for (i in 1:n) { sqrt(x)) / length(n) }
+options(scipen = 999) 
+a
+options(scipen = 0) 
+a
+b <- system.time(for (i in 1:n) { x^0.5) / length(n) }
+options(scipen = 999) 
+b
+options(scipen = 0) 
+b
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+library(readxl)
+lfa <- readxl("H:/Downloads/lfs.xlsx")
+```
+
+```{r}
+library(campfin)
+```

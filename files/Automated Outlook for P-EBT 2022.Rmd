@@ -1,0 +1,318 @@
+---
+title: "Untitled"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r}
+
+
+#install.packages("Microsoft365R")
+library(Microsoft365R)
+my_outlook <- get_business_outlook(app = "d44a05d5-c6a5-4bbb-82d2-443123722380")
+
+#my_outlook <- get_business_outlook(app = "d44a05d5-c6a5-4bbb-82d2-443123722380")
+
+library(emayili)
+#library(Microsoft365R)
+
+msg <- envelope(
+  to = "jared.walker@schools.utah.gov",
+  subject = "Test Email",
+  html = "C:\\Users\\jared.walker\\OneDrive - Utah State Board of Education\\First Follow Up Email.html"
+)
+
+msg <- my_outlook$create_email(msg)
+
+?set_config()
+msg$send()
+
+
+
+GET("http://google.com")
+set_config(verbose())
+GET("http://google.com")
+reset_config()
+GET("http://google.com")
+```
+
+```{r}
+
+
+
+my_email <- my_outlook$create_email("Body text I want in my email", 
+     subject = "Email subject", to = "recipient@email.com")
+
+
+
+my_email <- my_outlook$create_email(
+paste0("Greetings. ", "This is a test email sent from R. Below is a summary of errors. ",
+       "School Number: ", sum(is.na(df3$school_number))),
+subject = "Test", to = "jared.walker@schools.utah.gov")
+
+my_email
+
+
+```
+
+
+
+```{r}
+paste("School Name:", sum(is.na(df3$shool_name)))
+paste("Student SSID:", sum(is.na(df3$student_ssid)))
+paste("Student Last Name:", sum(is.na(df3$student_last_name)))
+paste("Student First Name:", sum(is.na(df3$student_first_name)))
+paste("Student DOB:", sum(is.na(df3$student_date_of_birth_mm_dd_yyyy)))
+paste("Guardian Last Name:", sum(is.na(df3$guardian_last_name)))
+paste("Guardian First Name:", sum(is.na(df3$guardian_first_name)))
+paste("Student Mailing Address:", sum(is.na(df3$student_mailing_address_line_1)))
+paste("Student Mailing City:", sum(is.na(df3$student_mailing_city)))
+paste("Student Mailing State:", sum(is.na(df3$student_mailing_state)))
+paste("Student Mailing Zip:", sum(is.na(df3$student_mailing_zip_i_e_84114_or_841141234)))
+paste("Missing Enrollment Date:", sum(!is.na(df3$l)))
+paste("Missing Eligibility Date:", sum(!is.na(df3$m)))
+paste("Incorrect Enrollment Date:", sum(!is.na(df3$n)))
+paste("Incorrect Eligibility Date:", sum(!is.na(df3$o)))
+```
+```{r}
+<br></br>
+```
+
+
+```{r}
+<br></br>
+```
+
+
+```{r}
+<br></br>
+```
+
+
+```{r}
+<br></br>
+```
+
+
+```{r}
+```
+
+
+```{r}
+
+library(readxl)
+
+all %>% 
+  summarise(min_date = min(start_date_mm_dd_yy),
+            max_date = max(end_date_mm_dd_yy))
+
+test_df %>% 
+  summarise(min_date_dob = min(student_date_of_birth),
+            max_date_dob = max(student_date_of_birth))
+
+names(all)
+```
+
+```{r}
+date = function(x) {
+   as.Date(as.numeric(x), origin = "1899-12-30")
+}
+
+df.a <- df %>% filter(group == "A") %>% arrange(count) %>%
+   mutate(V2 = date(V2),
+          V3 = date(V3),
+          V4 = date(V4))
+
+df.b <- df %>% filter(group == "B") %>% arrange(count)
+```
+
+```{r}
+clean2 <- df.a %>%
+   left_join(df.b, by = "count", keep = F) %>%
+   remove_constant() %>%
+   select(-count) %>%
+   group_by_all() %>%
+   mutate(unique_row_count = row_number(), .before = V1.x) %>%
+   filter(unique_row_count == 1) %>%
+   select(-unique_row_count)
+```
+
+```{r}
+library(robotstxt)
+paths_allowed(paths= "https://scholar.google.com/scholar?q=allintitle%3A+disinformation&hl=en&as_ylo=2022&as_yhi=2022&as_vis=1")
+```
+
+
+```{r}
+TrendTicker <- read_html("https://finance.yahoo.com/trending-tickers")  #read the path
+#We need Name, Last Price, % Change
+Name <- TrendTicker%>%
+  html_nodes("gs_rt")%>%html_text()
+Price <- TrendTicker%>%
+  html_nodes(".data-col2")%>%html_text()
+Change <- TrendTicker%>%
+  html_nodes(".data-col5")%>%html_text()
+dt<-tibble(Name,Price,Change)  #combine the scrapped columns into a tibble
+head(dt,5)
+
+Name
+
+
+paste("<ul>", sum(is.na(df3$school_name)), "School Name",
+      sum(is.na(df3$ssid)), "Student SSID", 
+      sum(is.na(df3$student_last)), "Student Last Name",
+      sum(is.na(df3$student_first)), "Student First Name", 
+      sum(is.na(df3$dob)), "Student DOB", 
+      sum(is.na(df3$guardian_last)), "Guardian Last Name", 
+      sum(is.na(df3$guardian_first)), "Guardian First Name", 
+      sum(is.na(df3$addr_line_1)), "Student Mailing Address", 
+      sum(is.na(df3$city)), "Student Mailing City", 
+      sum(is.na(df3$state)), "Student Mailing State", 
+      sum(is.na(df3$zip)), "Student Mailing Zip", 
+      sum(!is.na(df3$l)), "Missing Enrollment Date", 
+      sum(!is.na(df3$m)), "Missing Eligibility Date", 
+      sum(!is.na(df3$n)), "Incorrect Enrollment Date", 
+      sum(!is.na(df3$o)), "Incorrect Eligibility Date<<br></br> </ul>")
+
+
+```
+
+\
+
+
+
+
+
+```{r}
+
+
+GoogleHits <- function(input)
+   {
+    require(XML)
+    require(RCurl)
+    url <- paste("https//www.google.com/search?q=", input, sep = "") # modified line      
+    CAINFO = paste(system.file(package="RCurl"), "/CurlSSL/ca-bundle.crt", sep = "")
+    script <- getURL(url, followlocation = TRUE, cainfo = CAINFO)
+    doc <- htmlParse(script)
+    res <- xpathSApply(doc, '//*/div[@id="resultStats"]', xmlValue)
+    cat(paste("\nYour Search URL:\n", url, "\n", sep = ""))
+    cat("\nNo. of Hits:\n") # get rid of cat text if not wanted
+    return(as.integer(gsub("[^0-9]", "", res)))
+   }
+
+# Example:
+no.hits <- GoogleHits("health%20hospital")
+```
+
+```{r}
+page=read_html("https://www.eyeconic.com/contact-lenses?cid=ps:google:Eyeconic+-+US+-+SKWS+-+Contacts+-+General+-+Exact+-+Geo:NB+-+Contacts+-+Onlineutm_campaign=skws&ds_rl=1239071&gclid=EAIaIQobChMImpP2gqW95QIVipOzCh1XfwKbEAAYAiAAEgLWrfD_BwE&gclsrc=aw.ds")
+page2=read_html("https://www.eyeconic.com/contact-lenses/aot/AOT.html")
+node<- page%>%html_node(xpath='//*[@id="search-result-items"]/li[1]')
+nodes<-page%>%html_nodes(xpath='//*[@id="search-result-items"]/li[1]')
+node
+nodes
+```
+
+```{r}
+library(robotstxt)
+library(tibble)
+paths_allowed(paths=  "https://scholar.google.com/scholar?scisbd=2&q=allintitle:+disinformation&hl=en&as_sdt=0,45&as_vis=1" )
+
+
+gs <- read_html("https://scholar.google.com")  #read the path
+#We need Name, Last Price, % Change
+Name <- gs %>%
+  html_nodes(".data-col1")%>% html_text()
+Price <- gs %>%
+  html_nodes(".data-col2")%>% html_text()
+Change <- gs %>%
+  html_nodes(".data-col5")%>% html_text()
+dt<-tibble(Name,Price,Change)  #combine the scrapped columns into a tibble
+head(dt,5)
+
+```
+
+```{r}
+
+```
+
+```{sapply(1:10, function(x) print(paste0(url_a, x, url_b)))}
+
+x <- NA
+
+```
+
+```{r}
+
+
+url_a <- "AWESOME!!!"
+url_b <- "FUCK OFF ASSHOLE!"
+
+y <- c(0:10)
+for (i in y) {
+  print(paste0(url_a, i, url_b))
+}
+```
+
+```{r}
+library(devtools)
+install_github('akshaynagpal/rgscholar')
+library(RgScholar)
+```
+
+```{r}
+info <- google_Scholar("allintitle: disinformation", year_low = 2022, year_high = 2022)
+
+
+
+```
+
+```{r}
+
+example <- function(x, FUN1, FUN2) {
+  a <- sapply(x, FUN1)
+  b <- sapply(a, FUN2)
+  return(b)
+}
+example(c(-16,-9,-4,0,4,9,16), abs, sqrt)
+```
+
+```{}
+```
+
+```{r}
+
+```
+
+```{library(RgScholar)}
+ library(GEOquery)
+
+install.packages("GEOquery")
+
+
+library(GEOquery)
+library(Biobase)
+library(limma)
+
+gset <- getGEO("GSE54884", GSEMatrix =TRUE, getGPL=FALSE)
+
+
+
+adjustment. 
+July - August
+
+```
+
+```{r}
+
+options(max.print = 99999)
+library(rvest)
+url = "https://scholar.google.com/scholar?hl=en&as_sdt=0%2C45&q=allintitle%3A+disinformation&oq="
+
+download.file(url, destfile = "scrapedpage.html", quiet=F)
+content <- read_html("scrapedpage.html")
+
+content
+```
+
+<https://scholar.google.com/scholar?as_q=disinformation&as_epq=&as_oq=&as_eq=&as_occt=title&as_sauthors=&as_publication=&as_ylo=2000&as_yhi=2023&hl=en&as_sdt=0%2C45>

@@ -1,0 +1,38 @@
+---
+Title: "Data Cleaning"
+Project: "P-EBT 2022"
+Dept:   "Child Nutrition Programs"
+---
+
+# Set Up
+
+```{r set-up-run-once_per-session }
+
+rm(list=ls(all.name = T))   # Clear objects from workspace
+options(max.print = 100)    # Limit output
+options(scipen = 999)       # Prohibit scientific notation
+gc()                        # Free up memory
+
+#---------------------------- Import metadata ------------------------------
+source(r"(P:\1_Internal\Reports\CNP (all programs)\COVID-19\PEBT SY2022\R Operations\Workflow (source code)\1. Import Metadata.R)")
+#---------------------------------------------------------------------------
+user <- " TW "              
+destination <- "H:/Documents/" # File destination
+```
+
+# Clean Data
+
+```{r include=FALSE}
+#-------------------------------LEA name and file path ----------------------
+LEA_Name <- "Jordan SD"
+filename <- r"(P:\1_Internal\Reports\CNP (all programs)\COVID-19\PEBT SY2022\SFA Submissions SY2022\Jordan\S2\PEBT2022_14_Summer 2.xlsx)"
+
+#------------------------------- Run data cleaning program------------------
+source("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/R Operations/Workflow (source code)/3. Data_Clean_1_S2_R4_Rec_ParApp.R")
+
+#------------------------------- Save workbooks------------------------------
+saveWorkbook(wb, paste0(destination, round, LEA_Name, " (all)", user, date, ".xlsx"), overwrite = T)
+
+ifelse((nbr_Errors > 0), 
+       saveWorkbook(errors, paste0(destination, round, user, date, ".xlsx"),overwrite = T), print("ZERO ERRORS"))
+```

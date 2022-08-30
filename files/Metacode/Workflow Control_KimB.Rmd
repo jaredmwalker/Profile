@@ -1,0 +1,53 @@
+---
+Title: "Data Cleaning"
+Project: "P-EBT 2022"
+Dept:   "Child Nutrition Programs"
+---
+
+# Set Up
+
+```{r set-up-run-once_per-session,include=FALSE }
+#options(max.print = 100)       # Limit output
+#options(scipen = 999)          # Prohibit scientific notation
+setUp <- function(x) {
+  print(gc())             # Memory usage
+  rm(list=ls(all.name = T))     # Clear objects from workspace
+  print(gc())             # Memory usage
+  #------------User information
+  .GlobalEnv$user <- " Kim.Buesser "
+  .GlobalEnv$destination <- "C:/Users/Kim.Buesser/Documents"
+  source(r"(P:\1_Internal\Reports\CNP (all programs)\COVID-19\PEBT SY2022\R Operations\Workflow (source code)\1. Import Metadata.R)")
+}
+
+```
+
+# Clean Data
+
+```{r include=FALSE}
+#--------------------------setUp function------------------------------------------------
+setUp()
+
+
+names(df)
+#-------------------------LEA name and file path -----------------------------------------
+LEA_Name <- "Jordan"
+Round <- "S2" # "S2" / "Rec" / "ParApp" / "Rec"
+filename <- r"(P:\1_Internal\Reports\CNP (all programs)\COVID-19\PEBT SY2022\SFA Submissions SY2022\Jordan\S2\PEBT2022_14_Summer 2.xlsx)"
+
+#-------------------------Run data cleaning program---------------------------------------
+
+source("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/R Operations/Workflow (source code)/3. Data_Clean_1_S2_R4.R")
+
+#------------------------ Save workbooks---------------------------------------------------
+
+saveWorkbook(wb, paste0(destination, Round, LEA_Name, " (all)", user, date, ".xlsx"), overwrite = T)
+
+ifelse((nbr_Errors > 0), 
+       saveWorkbook(errors, paste0(destination, Round, " ", LEA_Name, " (errors)", user, date, ".xlsx"),overwrite = T), print("ZERO ERRORS"))
+```
+
+
+```{r}
+library(campfin)
+```
+
