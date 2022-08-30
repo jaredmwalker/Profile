@@ -1,0 +1,874 @@
+---
+title: "Untitled"
+author: "wynn shooter"
+date: '2022-04-26'
+output: html_document
+---
+
+# Library
+
+
+
+```{r, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(here)
+library(dynutils)
+library(snakecase)
+library(lubridate)
+library(data.table)
+```
+
+
+# Import
+
+compare_df_cols(r2, r3) %>% View()
+
+
+
+
+# Read in R3 files as a list
+```{r}
+start.time <- Sys.time()
+#read in files as a list
+pebt_files <- list.files(path = "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/2_Summer Round 1/Data Files//", pattern = "*csv", full.names = T)
+
+#combine list of files into a data frame
+pebt_super <- pebt_files %>%
+  map_df(read_csv, col_types = cols(.default = "c")) %>% 
+  clean_names() %>% 
+  mutate(sy21_22_student_enrollment_date_mm_dd_yyyy = mdy(sy21_22_student_enrollment_date_mm_dd_yyyy)) %>%  #convert to date for the purpose of selecting the max date to resolve duplicate values
+  remove_constant() #gets rid of columns that have either all NA or that have no variance. 
+  #remove_empty() 
+
+View(pebt_super)
+
+
+# R2 Code - Read files in as a list
+#pebt_files <- list.files(path = "G:/Data Stewards/Tammi Walker/P_EBT files/SY22 Round2//", pattern = "*csv", full.names = TRUE)
+
+# R2 Code - Import R1 file
+#r1 <- read_csv("G:/Data Stewards/Tammi Walker/P_EBT files/SY22 Round2/Round 1/P_EBT SY22 Round 1 DWS Submission 20220415.csv") %>% clean_names()
+
+#glimpse(r1)
+
+names(pebt_super)
+
+
+
+```
+
+
+```{r}
+#compare_df_cols(r2, r3) %>% View()
+
+#waldo::compare(names(r1), names(r3), max_diffs = 50)
+
+#names(r1)
+#names(r3)
+```
+
+
+
+# List of LEAs with NA for eligibility date
+```{r}
+#list of LEAs with NA in sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy (I found one and removed it on line 151)
+pebt_super %>% 
+  filter(is.na(sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy)) %>% count(lea_name)
+
+#for column sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy, determine if dates are between 7/1/21 and 5/6/2022  
+#there may also be values of 'N', 'No', 'Y', 'Yes', or other similar strings in this column. 
+#therefore, the steps are to duplicate the column, count the values in the column to find strings that don't look like dates. For all 'Y', 'Yes', and similar affirmative positive responses, convert those values to 7/1/2021, then create a separate column that is a date column and look for the range of dates.
+```
+C:/Users/jared.walker/OneDrive - Utah State Board of Education/cnp_pandemic_ebt_2022_6_2_JW.Rmd
+
+# Identify NAs in Required Fields # 1
+```{r}
+#look for NAs 
+sum(is.na(pebt_super$lea_code))
+sum(is.na(pebt_super$lea_name))
+sum(is.na(pebt_super$school_number))
+sum(is.na(pebt_super$school_name))
+sum(is.na(pebt_super$student_ssid))
+#sum(is.na(pebt_super$student_district_id_number))
+sum(is.na(pebt_super$student_last_name))
+sum(is.na(pebt_super$student_first_name))
+sum(is.na(pebt_super$student_date_of_birth_mm_dd_yyyy))
+sum(is.na(pebt_super$guardian_last_name))
+sum(is.na(pebt_super$guardian_first_name))
+#sum(is.na(pebt_super$guardian_phone_number))
+#sum(is.na(pebt_super$guardian_email_address))
+sum(is.na(pebt_super$student_mailing_address_line_1))
+sum(is.na(pebt_super$student_mailing_city))
+sum(is.na(pebt_super$student_mailing_state))
+sum(is.na(pebt_super$student_mailing_zip_i_e_84114_or_841141234))
+sum(is.na(pebt_super$sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov))
+sum(is.na(pebt_super$sy21_22_student_enrollment_date_mm_dd_yyyy))
+sum(is.na(pebt_super$sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy))
+```
+
+# Remove Rows Consisting Only of NAs
+```{r}
+
+here 
+
+, locale = locale(encoding = "Latin1"))
+
+pebt_super_no_nas <- pebt_super9 %>%
+  mutate(na_count = rowSums(!is.na(pebt_super9)), .before = lea_code) %>%
+  filter(na_count > 1) %>%
+  select(-na_count)
+
+nrow(pebt_super_no_nas)
+nrow(pebt_super9)
+
+pebt_super <- pebt_super2
+
+
+name <- pebt_super %>%
+  filter(is.na(guardian_first_name))
+
+View(name)
+
+names(pebt_super)
+
+```
+
+# Identify NAs in Required Fields # 2
+```{r}
+#look for NAs 
+sum(is.na(pebt_super$lea_code))
+sum(is.na(pebt_super$lea_name))
+sum(is.na(pebt_super$school_number))
+sum(is.na(pebt_super$school_name))
+sum(is.na(pebt_super$student_ssid))
+#sum(is.na(pebt_super2$student_district_id_number))
+sum(is.na(pebt_super2$student_last_name))
+sum(is.na(pebt_super2$student_first_name))
+sum(is.na(pebt_super2$student_date_of_birth_mm_dd_yyyy))
+sum(is.na(pebt_super2$guardian_last_name))
+sum(is.na(pebt_super2$guardian_first_name))
+#sum(is.na(pebt_super2$guardian_phone_number))
+#sum(is.na(pebt_super2$guardian_email_address))
+sum(is.na(pebt_super2$student_mailing_address_line_1))
+sum(is.na(pebt_super2$student_mailing_city))
+sum(is.na(pebt_super2$student_mailing_state))
+sum(is.na(pebt_super2$student_mailing_zip_i_e_84114_or_841141234))
+sum(is.na(pebt_super2$sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov))
+sum(is.na(pebt_super2$sy21_22_student_enrollment_date_mm_dd_yyyy))
+sum(is.na(pebt_super2$sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy))
+```
+
+# Instructions for duplicates
+```{r}
+#Check for duplicate records with the same SSID. We want one record for each SSID- keep all the data from the record with the latest (most recent) enrollment date with the exception that the number of days by month (columns X-AC) will contain the sum from all records with that same SSID.
+#create a flag for the duplicate cases, use the most recent enrollment date, add up all of the number of days (don't delete any number of days when I clean out older enrollments). create two files, one for most recent date and one for prior enrollment dates.
+#For duplicate records, look to see if the names and SSIDs match across all duplicates (to look for incorrect SSIDs)
+#make sure all names and SSIDs are correct in the duplicates.
+#due to DWS on June 1
+#all data should be available May 6. #I received the final data on May 31
+```
+
+# Duplicate SSIDs within LEAs
+```{r}
+
+
+#create flag for duplicate SSIDs
+duplicates <- pebt_super3 %>%
+  filter(duplicate_flag > 0)
+View(duplicates)
+
+#write.xlsx(duplicates, "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/2_Summer Round 1/all_duplicates.xlsx", 
+#             overwrite = T)
+
+#create flag for duplicate SSIDs
+check <- pebt_super9 %>% 
+  group_by(student_ssid) %>%
+  mutate(duplicate_flag = +(n() > 1)) %>%
+  relocate(duplicate_flag) %>%
+  ungroup()
+
+View(check)
+
+#check to see if duplicates are within the same LEA or across LEAs (none of the duplicates are within the same LEA)
+pebt_super %>% 
+  filter(duplicate_flag == 1) %>% 
+  count(lea_name, student_ssid) %>% 
+  arrange(desc(student_ssid)) %>% 
+  filter(n > 1) %>% 
+  ungroup()
+```
+
+# Duplicate SSIDs
+```{r}
+##########################################
+#review duplicate SSIDs ##if duplicates are in the same LEA, then CNP will follow up, if duplicate is across LEAs, then I fix it
+#we iterated through this process several times during the data collection period 
+#the finalized data that I received included 114 students with duplicate SSIDS (228 rows)
+
+View(pebt_super999)
+
+pebt_super999 %>% 
+  group_by(student_ssid) %>%
+  summarise(n=n()) %>% 
+  arrange(desc(n)) %>% View()
+View(pebt_super2)
+# n() = The number of observations in the current group.
+
+# Isolate duplicates
+dups_ssid_r3 <- pebt_super %>% 
+  filter(duplicate_flag == 1) %>% 
+  arrange(desc(student_ssid))
+```
+
+
+
+
+```{r}
+
+# remove duplicates from data
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+View(pebt_super)
+
+pebt_super1 <- pebt_super %>%
+  filter(student_ssid %!in% duplicates$student_ssid) 
+
+nrow(pebt_super_no_nas)
+nrow(pebt_super1)
+
+# add resolved duplicates back to data
+
+Import resolved duplicates
+
+HERE 
+s1_resolved_duplicates2 <- read_csv("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/2_Summer Round 1/All_duplicates_Keep.csv", col_types = cols(.default = "c")) %>% select(-duplicate_flag) %>%
+   mutate(sy21_22_student_enrollment_date_mm_dd_yyyy = mdy(sy21_22_student_enrollment_date_mm_dd_yyyy))
+
+View(s1_resolved_duplicates2)
+
+pebt_super9 <- pebt_super1 %>%
+  bind_rows(s1_resolved_duplicates2)
+
+nrow(pebt_super9)
+
+write_csv(pebt_super9, "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/2_Summer Round 1/S1 DWS Prelim (UTF-8 encoding).csv", na = "")
+
+```
+
+
+
+## Convert to numeric
+## Resolve duplicate SSIDs
+```{r}
+#Fix duplicate SSID rows. 
+#changed data type to numeric to accommodate the math. 
+#summed the number of days columns for duplicate rows
+#removed original days columns
+#renamed new (summed) columns back to their original names (to match those of the main file) 
+pebt_super3 <- pebt_super %>% 
+  filter(duplicate_flag == 1) %>% #filter to select only duplicate SSIDs
+  mutate(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022)) %>% 
+  group_by(student_ssid) %>% 
+  mutate(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021_summed = sum(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021_summed = sum(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021_summed = sum(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021_summed = sum(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022_summed = sum(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022_summed = sum(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022_summed = sum(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022_summed = sum(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022)) %>% 
+  arrange(desc(student_ssid)) %>% #this was just a check to make sure everything looked good so far
+  filter(sy21_22_student_enrollment_date_mm_dd_yyyy == max(sy21_22_student_enrollment_date_mm_dd_yyyy)) %>% #filter to select the most recent enrollment date
+  select(-number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021: -number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022) %>% 
+  rename(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021 = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021_summed,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021 = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021_summed,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021 = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021_summed,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021 = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021_summed,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022 = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022_summed,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022 = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022_summed,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022 = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022_summed,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022 = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022_summed
+         ) 
+#After completing the above changes, two students still have duplicate rows, because they have the same enrollment date. After reviewing these duplicates with Tammi, she decided to keep the summed number of days and delete one of the rows. Both students were identified as in Granite and USDB, we removed the Granite rows.
+```
+
+
+```{r}
+View(pebt_super3)
+#have a look at the two duplicates that did not get cleaned up from the run above.
+pebt_super %>% 
+  group_by(student_ssid) %>% 
+  summarise(n = n()) %>% 
+  arrange(desc(n)) %>% 
+  View()
+#pebt_super %>% filter(student_ssid == "2315640") %>% View()
+#pebt_super %>% filter(student_ssid == "2516755") %>% View()
+
+#create a df that does not include the two granite rows and keeps the two USDB rows. 
+#twodups_pebt_super_prep <- pebt_super3 %>%
+#  group_by(student_ssid) %>% 
+#  mutate(duplicate_flag2 = +(n() > 1)) %>% 
+#  ungroup() %>% 
+#  filter(duplicate_flag2 == 1 & lea_name != "Granite School District") %>% 
+#  select(-duplicate_flag2)
+#create a df that does not include the two duplicates (removing all 4 rows) from pebt_super_prep
+#twodups_removed_pebt_super_prep <- pebt_super %>% 
+#  filter(student_ssid != "2315640",
+#         student_ssid != "2516755")
+#add the two USDB rows back to the cleaned df of 114 rows that were duplicated, but that now are distinct
+final_dups_fixed <- twodups_pebt_super_prep %>% 
+  union(twodups_removed_pebt_super_prep)
+```
+
+# Remove Duplicates
+```{r}
+
+View(dups_removed)
+#remove duplicates from main file and change data type of days columns to numeric. I will union the corrected duplicates to this df
+dups_removed <- pebt_super %>% 
+  filter(duplicate_flag == 0) %>% 
+  mutate(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022 = as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022))
+
+
+```
+
+
+
+
+## union() - remove duplicates
+```{r}
+#union the 114 rows back into the main file and remove one row that has all  values
+pebt_super <- dups_removed %>% 
+  union(final_dups_fixed) %>% 
+  filter(!is.na(lea_name))
+
+
+
+
+write.csv(pebt_super, "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 3/P_EBT SY22 Round 3 DWS Submission 20220630_Prelim.csv", na="")
+
+
+pebt_super[5530, ]
+
+View(pebt_super)
+
+```
+
+# Clean up environment
+```{r}
+#remove unneeded dfs from the environment
+rm(dups_removed)
+rm(final_dups_fixed)
+rm(pebt_super_prep)
+rm(twodups_pebt_super_prep)
+rm(twodups_removed_pebt_super_prep)
+```
+
+# Import Round 1 file
+```{r}
+#Check if there are any students that also appear on Round 1. We will keep the Round 2 record (school name, student name, guardian name, address) and add virtual days by month from Round 1 to Round 2 virtual days for any student that appears on both files. Keep any students that appear on Round 2 but not Round 1 and leave their data as is.
+#only interested in sep to feb
+#read in Final Round 1 file
+r1 <- read_csv("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 1/P_EBT SY22 Round 1 DWS Submission 20220415.csv") %>% clean_names()
+
+glimpse(r1)
+
+
+#colnames(r3) <- colnames(r1)
+
+#compare_df_cols(r1, r3) %>% View()
+
+#View(r3)
+
+#View(r2)
+
+
+#pebt_super <- pebt_super %>% select(order(colnames(pebt_super)))
+
+
+#r1 <- r1 %>% select(order(colnames(r1)))
+
+
+
+```
+
+
+# Import Round 2 file with formatting
+```{r}
+
+# HERE 2
+
+#Check if there are any students that also appear on Round 1. We will keep the Round 2 record (school name, student name, guardian name, address) and add virtual days by month from Round 1 to Round 2 virtual days for any student that appears on both files. Keep any students that appear on Round 2 but not Round 1 and leave their data as is.
+#only interested in sep to feb
+#read in Final Round 1 file
+r2 <- read.csv("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 2/P_EBT SY22 Round 2 DWS Submission 20220602_R3 Compile.csv", 
+               colClasses = c("character", "character", "character", "character", "numeric", 
+                              "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", 
+                              "numeric", "numeric", "numeric", "character", "character", 
+                              "character", "character", "character", "character", "character", 
+                              "character", "character", "character", "character", "character", 
+                              "character", "character", "character")) %>% clean_names() 
+
+#r2 %>% select(order(colnames(r2)))
+
+
+
+
+View(r2)
+
+names(r2)
+lapply(r2, class)
+
+str(r2)
+
+comp <- compare_df_cols(r3, r2) 
+
+View(comp)
+```
+
+
+```{r}
+#here
+
+r2$student_district_id_number
+View(r2)
+
+
+
+glimpse(r2)
+
+#clean up round 1 df prior to join: rename two columns, drop unneeded columns, add a column to identify this df
+#r1 <- r1 %>% 
+#  rename("student_ssid" = ssid, "student_date_of_birth_mm_dd_yyyy" = student_date_of_birth) %>% 
+#  select(-c(eligible_days_mar2022:cep_provision), -c(guardian_last_name:notes)) %>% 
+#  mutate(student_ssid = as.character(student_ssid),
+#         r1 = "r1")
+
+
+```
+
+
+```{r}
+
+
+```
+
+
+# Date ranges
+```{r}
+#first look at date ranges
+pebt_super %>% 
+  group_by(sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy) %>% 
+  count(sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy) %>% 
+  arrange(sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy) %>% View()
+
+#convert to a date and sort to inspect date range. this was part of the data collection and validation process. We did find two dates before 7/1/21 and Tammi corrected those in the source file (there are 9 rows with a date after 5/6/22, and Tammi said that is fine).
+pebt_super %>% 
+  mutate(date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy = str_replace(sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy, "Y", "07/01/2021"),
+         date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy = str_replace(date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy, "y", "07/01/2021"), 
+         date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy = mdy(date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy)) %>% 
+  group_by(date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy) %>% 
+  count(date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy) %>% 
+  arrange() %>% 
+View()
+```
+#.
+
+# Left join R1 and R2 by SSID
+```{r}
+View(r2)
+
+View(pebt_super)
+
+#clean up round 1 df prior to join: rename two columns, drop unneeded columns, add a column to identify this df
+#r1 <- r1 %>% 
+#  rename("student_ssid" = ssid, "student_date_of_birth_mm_dd_yyyy" = student_date_of_birth) %>% 
+#  select(-c(eligible_days_mar2022:cep_provision), -c(guardian_last_name:notes)) %>% 
+#  mutate(student_ssid = as.character(student_ssid),
+#         r1 = "r1")
+```
+
+
+
+
+
+```{r}
+#r2 %>% select(order(colnames(r2)))
+
+#r3 %>% select(order(colnames(r3)))
+
+
+#comp <- compare_df_cols(r3, r2) 
+
+
+#comp$df
+```
+
+
+```{r}
+#compare_df_cols(r1, pebt_super) %>% View()
+
+#df2 <- r2
+#df1 <- r3
+
+
+#
+```
+	
+student_district_id_number
+
+# Compare
+
+```{r}
+# here 3
+
+
+
+ncol(r2)
+ncol(r3)
+
+r2$student_district_id_number  <- NA
+r2$student_district_id_number <- as.numeric(r2$student_district_id_number)
+
+
+r2$sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov  <- NA
+r2$sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov <- as.character(r2$sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov)
+
+r2$sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy  <- NA
+r2$sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy <- as.character(r2$sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy)
+
+r2$sy21_22_student_withdrawal_date_mm_dd_yyyy  <- NA
+r2$sy21_22_student_withdrawal_date_mm_dd_yyyy <- as.character(r2$sy21_22_student_withdrawal_date_mm_dd_yyyy)
+
+
+
+r2$student_mailing_zip_i_e_84114_or_841141234 <- as.numeric(r2$student_mailing_zip_i_e_84114_or_841141234)
+
+	
+
+
+#change to date
+r2$sy21_22_student_enrollment_date_mm_dd_yyyy <- as.Date(r2$sy21_22_student_enrollment_date_mm_dd_yyy, "%m/%d/%Y")
+
+comp <- compare_df_cols(r3, r2) 
+View(comp)
+```
+
+
+```{r}
+
+
+#left join r1 and r2 on ssid (243 rows match)
+r2_and_r3 <- r3 %>% 
+  left_join(r2, by = "student_ssid") #%>% dplyr::filter(r2 %in% NA)## 
+
+View(r2_and_r3)
+
+```
+
+
+```{r}
+r2$student_ssid <- as.numeric(r2$student_ssid)
+r3$student_ssid <- as.numeric(r3$student_ssid)
+str(r2)
+str(r3)
+```
+
+
+```{r}
+#double check that there are no duplicates in the joined file
+r2_and_r3 %>% 
+  group_by(student_ssid) %>% 
+  summarise(n = n()) %>% 
+  arrange(desc(n)) %>% View()
+
+compare_df_cols(r1, pebt_super) %>% View()
+
+#add column values together for Sep, Oct, Nov, Dec, Jan, or Feb
+#drop previous two sets of columns
+#rename new columns to match r2; 
+r1_clean <- r1_and_r2 %>% 
+  filter(!is.na(r1)) %>%
+  mutate(september = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021 + eligible_days_sep2021,
+         october = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021 + eligible_days_oct2021, 
+         november = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021 + eligible_days_nov2021,
+         december = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021 + eligible_days_dec2021,
+         january = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022 + eligible_days_jan2022,
+         february =  number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022 + eligible_days_feb2022) %>%
+  select(-c(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021:number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022), -c(eligible_days_sep2021:eligible_days_feb2022)) %>% 
+  rename(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021 = september,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021 = october,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021= november,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021 = december,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022 = january,
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022 = february) %>% 
+  mutate(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022 = "NA",
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022 = "NA") 
+
+#remove from r2 before union: unmatched r1 rows and r1 month columns      
+r2_for_join <-  r1_and_r2 %>% 
+  select(-c(eligible_days_sep2021:eligible_days_feb2022)) %>% 
+  filter(is.na(r1))
+```
+
+# Make sure column names match
+```{r}
+#make sure column names match
+compare_df_cols(r2_for_join, r1_clean) %>% View()         
+#change data type to accommodate union
+r2_for_join <- r2_for_join %>% 
+  mutate(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022 = as.character(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022 = as.character(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022))
+```
+
+# Create final df
+## Final clean up
+```{r}
+#create final df
+r1_and_r2_final <- r2_for_join %>% 
+  union(r1_clean)
+
+r1_and_r2_final %>% 
+  filter(!is.na(r1)) %>% View()
+
+glimpse(r1_and_r2_final)
+
+#some final clean up... add dash to phone numbers, convert strings to all upper case, drop unneeded columns
+r1_and_r2_final <- r1_and_r2_final %>% #filter(!is.na(lea_name.y)) %>% View()
+  rename(lea_code = lea_code.x,
+         lea_name = lea_name.x,
+         school_number = school_number.x,
+         school_name = school_name.x,
+         student_last_name = student_last_name.x,
+         student_middle_name = student_middle_name.x,
+         student_first_name = student_first_name.x,
+         student_date_of_birth_mm_dd_yyyy = student_date_of_birth_mm_dd_yyyy.x) %>%
+  mutate(guardian_phone_number = str_replace(guardian_phone_number, "(\\d{3})(\\d{3})(\\d{4})$", "\\1-\\2-\\3"),
+         lea_name = str_to_upper(lea_name),
+         school_name = str_to_upper(school_name),
+         student_last_name = str_to_upper(student_last_name),
+         student_middle_name = str_to_upper(student_middle_name),
+         student_first_name = str_to_upper(student_first_name),
+         guardian_last_name = str_to_upper(guardian_last_name),
+         guardian_first_name = str_to_upper(guardian_first_name),
+         student_mailing_address_line_1 = str_to_upper(student_mailing_address_line_1),
+         student_mailing_address_line_2 = str_to_upper(student_mailing_address_line_2),
+         student_mailing_city = str_to_upper(student_mailing_city),
+         student_mailing_state = str_to_upper(student_mailing_state)) %>% 
+    select(-c(duplicate_flag:student_date_of_birth_mm_dd_yyyy.y)) %>% 
+  mutate(sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov = case_when(sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov %in% 
+       c("F","Free", "MED-FREE", "SNAP", "MED FREE", "I.FREE", "f", "Med-Free") ~ "F" ,
+        sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov %in% 
+       c("R","Reduced","RDC", "I.REDUCED", "MED-RED", "r") ~ "R",
+        sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov %in% 
+       c("Prov", "Prov 2") ~ "Prov",
+        sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov %in% 
+       c("CEP") ~ "CEP")) 
+
+#pasted in from Jared's code and changed the name of the df
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BUILDING#", "BLDG ",   r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BUILDING #", "BL DG ", r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BUILDING", "BLDG",     r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BLDG#", "BLDG ",       r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BLDG #", "BLDG ",      r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BLDG BLDG", "BLDG",    r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub(" BLD ", " BLDG ",      r1_and_r2_final$student_mailing_address_line_1)
+
+r1_and_r2_final$student_mailing_address_line_1 <- sub("APARTMENT #", "APT ", r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("APARTMENT#", "APT ",  r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("APARTMENT", "APT",    r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("APT#", "APT ",        r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("APT #", "APT ",       r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("APTAPT", "APT",       r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("APT APT", "APT",      r1_and_r2_final$student_mailing_address_line_1)
+
+r1_and_r2_final$student_mailing_address_line_1 <- sub("SUITE#", "STE ",      r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("SUITE #", "STE ",     r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("SUITE", "STE",        r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("STE#", "STE ",        r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("STE #", "STE ",       r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("STE STE", "STE",      r1_and_r2_final$student_mailing_address_line_1)
+
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BASEMENT#", "BSMT ",  r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BASEMENT #", "BSMT ", r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BASEMENT", "BSMT",    r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BSMT BSMT", "BSMT",   r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BSMT#", "BSMT ",      r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("BSMT #", "BSMT ",     r1_and_r2_final$student_mailing_address_line_1)
+
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TLR#", "TRLR ",       r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TLR #", "TRLR ",      r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub(" TLR ", " TRLR ",     r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TRL#", "TRLR ",       r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TRL #", "TRLR ",      r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TRAILER#", "TRLR ",   r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TRAILER #", "TRLR ",  r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TRAILER", "TRLR",     r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TRLR TRLR", "TRLR",   r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("TRLR#", "TRLR ",      r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("   ", " ", r1_and_r2_final$student_mailing_address_line_1)
+r1_and_r2_final$student_mailing_address_line_1 <- sub("  ", " ", r1_and_r2_final$student_mailing_address_line_1)
+#r1_and_r2_final$student_mailing_address_line_1 <- sub("TRLR #", "TRLR ",     r1_and_r2_final$student_mailing_address_liner1)
+
+# student_mailing_address_line_2
+r1_and_r2_final$student_mailing_address_line_2 <- sub("APARTMENT #", "APT ", r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("APARTMENT#", "APT ",  r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("APARTMENT", "APT",    r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("APT#", "APT ",        r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("APT #", "APT ",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("APTAPT", "APT",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("APT APT", "APT",      r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UNIT#", "UNIT ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UNIT #", "UNIT ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UNITUNIT", "UNIT",    r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UNIT UNIT", "UNIT",   r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BUILDING#", "BLDG ",  r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BUILDING #", "BLDG ", r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BUILDING", "BLDG",    r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BLDG#", "BLDG ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BLDG #", "BLDG ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BLDG BLDG", "BLDG ",  r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub(" BLD ", " BLDG ",     r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("SUITE#", "STE ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("SUITE #", "STE ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("SUITE", "STE ",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("STE#", "STE ",        r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("STE #", "STE ",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("STE STE", "STE",      r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("ROOM#", "RM ",        r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("ROOM #", "RM ",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("ROOM", "RM",          r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("RM#", "RM ",          r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("RM #", "RM ",         r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("RM RM", "RM",         r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOWER#", "LOWR ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOWER #", "LOWR ",    r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOWER", "LOWR",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOWR#", "LOWR ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOWR #", "LOWR ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOWR LOWR", "LOWR",   r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOWR", " LOWR",       r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UPPER#", "UPPR ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UPPER #", "UPPR ",    r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UPPER", "UPPR ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UPPR#", "UPPR ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UPPR #", "UPPR ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("UPPR UPPR", "UPPR",   r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOT#", "LOT ",        r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOT #", "LOT ",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("LOT LOT", "LOT",      r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("FRONT#", "FRNT ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("FRONT #", "FRNT ",    r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("FRONT", "FRNT",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("FRNT#", "FRNT ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("FRNT #", "FRNT ",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("FRNT FRNT", "FRNT",   r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BASEMENT#", "BSMT ",  r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BASEMENT #", "BSMT ", r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BASEMENT", "BSMT",    r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BSMT BSMT", "BSMT",   r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BSMT#", "BSMT ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("BSMT #", "BSMT ",     r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TLR#", "TRLR ",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TLR #", "TRLR ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TLR ", "TRLR ",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TRL#", "TRLR ",       r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TRL #", "TRLR ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TRAILER#", "TRLR ",   r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TRAILER #", "TRLR ",  r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TRAILER", "TRLR",     r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TRLR TRLR", "TRLR",   r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TRLR#", "TRLR ",      r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("TRLR #", "TRLR ",     r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("PO BOS", "PO BOX",    r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("P O BOX", "PO BOX",   r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("POBOX", "PO BOX",     r1_and_r2_final$student_mailing_address_line_2)
+
+r1_and_r2_final$student_mailing_address_line_2 <- sub("   ", " ", r1_and_r2_final$student_mailing_address_line_2)
+r1_and_r2_final$student_mailing_address_line_2 <- sub("  ", " ", r1_and_r2_final$student_mailing_address_line_2)
+
+#create final file
+r1_and_r2_final %>% 
+  write_csv("round_2_clean_2022_6_2.csv")
+
+```
+
+
+# Source code from data set up
+```{r}
+#source code from data set up 
+#remove extra columns (entheos had an extra space in one column heading that created a second unnecessary column)
+combine_files_df_21 <- combine_files_df_21 %>% 
+  filter(lea_name == "Entheos Academy") %>% 
+  select(-sy21_22_student_enrollment_date_mm_dd_yyyy) %>% 
+  rename(sy21_22_student_enrollment_date_mm_dd_yyyy = sy21_22_student_enrollment_date_mm_dd_yyyy_2) %>% 
+  union_all(combine_files_df_21) %>% 
+  filter(is.na(sy21_22_student_enrollment_date_mm_dd_yyyy_2)) %>% 
+  select(-sy21_22_student_enrollment_date_mm_dd_yyyy_2) %>% 
+  select(lea_code:sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov, sy21_22_student_enrollment_date_mm_dd_yyyy, everything()) 
+```
+
+
+```{r}
+##graveyard
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+
+####exploring the contents of an extra column. I made Tami aware of this and she made the correction in the source files.
+#pebt_super %>% 
+#  filter(lea_code %in% c("7H", "11"),
+#    is.na(sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov)) %>% 
+#  select(-sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov) %>% 
+#  rename(sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov = sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov_2) %>% 
+#  union(pebt_super) %>% View()
+#
+#pebt_super %>% 
+#  filter(!is.na(sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov_2)) %>% View()
+#
+#pebt_super %>% 
+#  filter(lea_code == "11") %>% View()
+#         is.na(sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov) %>% View() 
+#
+#pebt_super %>% 
+#  remove_empty("rows") %>% View()
+
+#if I decide to create a flag for the strings that are not dates
+#  mutate(date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy = mdy(sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy),
+ #        r1_flag = if_else(is.na(date_only_sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy), 1, 0)) %>% count(r1_flag)
+```
+
+
+
+```{r}
+end.time <- Sys.time() # Stop Timer                              
+duration <- end.time - start.time
+duration
+```
+

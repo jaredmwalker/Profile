@@ -1,0 +1,124 @@
+```{r echo = F}
+
+rm(list = ls(all.names = T)) #clear all objects from environment.
+
+library(tidyverse)
+library(nFactors)
+library(randomNames)
+library(ggplot2)
+library(gplots)
+library(readxl)
+library(udpipe)
+library(ids)
+
+```
+
+# extra variables: "elected_office", "county", "level", "medium",
+
+```{r}
+
+# Winners 
+
+matrix <- matrix(ncol = 10, nrow = 10)
+
+rep_tweets <- sample(0:1, size = 20, replace = T, prob = c(.1, .9))
+dem_tweets <- sample(0:1, size = 20, replace = T, prob = c(.7, .1))
+
+
+
+rep_ids <- sample(10000:20000, size = 20, replace = T)
+dem_ids <- sample(10000:20000, size = 20, replace = T)
+
+colnames(matrix) <- c("race_id"	,"outcome",	"votes_received",	"share_of_vote",	"candidate_name",	"party",	"tweet","no_of_retweets",	"fb_post",	"no_of_shares")
+
+
+f <- matrix %>%
+   data.frame() %>%
+   mutate(gender = "F",
+          candidate_name = randomNames(10, gender = 1, ethnicity = 1, 
+                                       name.order = "first.last", name.sep = " "))
+
+m <- matrix %>%
+   data.frame() %>%
+   mutate(gender = "M",
+          candidate_name = randomNames(10, gender = 0, ethnicity = 1, 
+                                       name.order = "first.last", name.sep = " "))
+
+r <- rbind(m, f) %>%
+   arrange(candidate_name) %>%
+   mutate(party = "Republican", 
+          race_id = rep_ids,
+          tweet = rep_tweets)
+
+
+
+#r$no_of_retweets <- ifelse(r$tweet == 1, sample(25000:50000), sample(1000:10000))
+
+
+f <- matrix %>%
+   data.frame() %>%
+   mutate(gender = "F",
+          candidate_name = randomNames(10, gender = 1, ethnicity = 1, 
+                                       name.order = "first.last", name.sep = " "))
+
+m <- matrix %>%
+   data.frame() %>%
+   mutate(gender = "M",
+          candidate_name = randomNames(10, gender = 0, ethnicity = 1, 
+                                       name.order = "first.last", name.sep = " "))
+
+d <- rbind(m, f) %>%
+   arrange(candidate_name) %>%
+   mutate(party = "Democrat", 
+          race_id = dem_ids,
+          tweet = dem_tweets)
+         
+
+winners <- rbind(r, r, r, r, r, d, d, d, d, d) %>% 
+   mutate(outcome = "W") 
+
+# Losers 
+
+f <- matrix %>%
+   data.frame() %>%
+   mutate(gender = "F",
+          candidate_name = randomNames(10, gender = 1, ethnicity = 1, 
+                                       name.order = "first.last", name.sep = " "))
+
+m <- matrix %>%
+   data.frame() %>%
+   mutate(gender = "M",
+          candidate_name = randomNames(10, gender = 0, ethnicity = 1, 
+                                       name.order = "first.last", name.sep = " "))
+
+r <- rbind(m, f) %>%
+   arrange(candidate_name) %>%
+   mutate(party = "Republican", 
+          race_id = dem_ids)
+
+
+f <- matrix %>%
+   data.frame() %>%
+   mutate(gender = "F",
+          candidate_name = randomNames(10, gender = 1, ethnicity = 1, 
+                                       name.order = "first.last", name.sep = " "))
+
+m <- matrix %>%
+   data.frame() %>%
+   mutate(gender = "M",
+          candidate_name = randomNames(10, gender = 0, ethnicity = 1, 
+                                       name.order = "first.last", name.sep = " "))
+
+d <- rbind(m, f) %>%
+   arrange(candidate_name) %>%
+   mutate(party = "Democrat", 
+          race_id = rep_ids)
+         
+losers <- rbind(r, r, r, r, r, d, d, d, d, d) %>% 
+   mutate(outcome = "L")
+
+all <- rbind(winners, losers) %>% arrange(race_id, candidate_name)
+
+
+view(all)
+```
