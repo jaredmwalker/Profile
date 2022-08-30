@@ -1,0 +1,331 @@
+
+```{r, include=FALSE}
+start.time <- Sys.time() # Start Timer==
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(here)
+library(dynutils)
+library(snakecase)
+library(lubridate)
+library(data.table)
+library(openxlsx)
+```
+
+# Import R1, R2, R3
+```{r}
+rm(list=ls()) # Clear Objects from Work Space
+
+r3 <- read_csv("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 3/P_EBT SY22 Round 3 DWS Submission 20220630_Prelim.csv", locale = locale(encoding = "Latin1")) %>% clean_names %>%
+  select(-c(x1, duplicate_flag))
+
+r2 <- read.csv("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 2/P_EBT SY22 Round 2 DWS Submission 20220602_R3 Compile.csv") %>% 
+  clean_names() %>%
+  mutate(student_district_id_number = NA, 
+         sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov = NA,
+         sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy = NA,
+         sy21_22_student_withdrawal_date_mm_dd_yyyy = NA,
+         sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov =
+           as.character(sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov),
+         sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy = 
+           as.character(sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy),
+         sy21_22_student_withdrawal_date_mm_dd_yyyy = 
+           as.character(sy21_22_student_withdrawal_date_mm_dd_yyyy),
+         sy21_22_student_enrollment_date_mm_dd_yyyy = 
+           as.Date(sy21_22_student_enrollment_date_mm_dd_yyyy, "%m/%d/%Y"),
+         student_mailing_zip_i_e_84114_or_841141234 = 
+           as.numeric(student_mailing_zip_i_e_84114_or_841141234),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022 =
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021),
+         student_ssid = as.numeric(student_ssid),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022),
+         student_district_id_number = as.numeric(student_district_id_number))
+
+comp <- compare_df_cols(r2, r3)
+View(comp)
+
+View(r2)
+         
+r1 <- read_csv("P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 1/P_EBT SY22 Round 1 DWS Submission 20220415_R3 Compile.csv", locale = locale(encoding = "Latin1")) %>% 
+  clean_names() %>%
+  mutate(student_district_id_number = NA, 
+         sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov = NA,
+         sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy = NA,
+         sy21_22_student_withdrawal_date_mm_dd_yyyy = NA,
+         sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov =
+           as.character(sy21_22_student_eligibility_free_reduced_cep_provision_f_r_cep_prov),
+         sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy = 
+           as.character(sy21_22_student_free_reduced_price_meal_eligibility_date_mm_dd_yyyy),
+         sy21_22_student_withdrawal_date_mm_dd_yyyy = 
+           as.character(sy21_22_student_withdrawal_date_mm_dd_yyyy),
+         sy21_22_student_enrollment_date_mm_dd_yyyy = 
+           as.Date(sy21_22_student_enrollment_date_mm_dd_yyyy, "%m/%d/%Y"),
+         student_mailing_zip_i_e_84114_or_841141234 = 
+           as.numeric(student_mailing_zip_i_e_84114_or_841141234),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022 =
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022),
+         number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022 = 
+           as.numeric(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022),
+         student_district_id_number = as.numeric(student_district_id_number),
+         comments = as.character(comments))
+
+comp <- compare_df_cols(r1, r3)
+View(comp)
+
+r1.1 <- r1
+r2.1 <- r2
+r3.1 <- r3
+```
+
+# Sum R2 & R3
+```{r}
+#Round 1: Sep-Feb, Round 2: Mar-Apr, Round 3: May
+r1 <- r1.1
+r2 <- r2.1
+r3 <- r3.1
+
+ncol(r1)
+ncol(r2)
+ncol(r3)
+
+r2$student_ssid.y <- NA
+r2$student_ssid.y <- r2$student_ssid
+
+#left join r1 and r2 on ssid (243 rows match)
+r3_r2 <- r3 %>% 
+  left_join(r2, by = "student_ssid") #%>% dplyr::filter(r2 %in% NA)##
+
+
+r3_r2$number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022.y <- 0
+
+names(r3_r2)
+
+#r3_r2.y$number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022 <- 0
+
+
+
+
+r3_r2.y <- r3_r2 %>%
+  mutate(september= 
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021.x +
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021.y, october =
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021.x + 
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021.y,
+           november=
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021.x +
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021.y,
+           december =
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021.x +
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021.y,
+           january =
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022.x +
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022.y,
+           february =
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022.x +
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022.y,
+           march =
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022.x +
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022.y,
+           april =
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022.x +
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022.y,
+           may =
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022.x +
+           number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022.y) %>%
+  mutate(comments = comments.x)
+
+names(r3_r2.y)
+```
+
+# Subset 1: Students in Both R2 & R3
+```{r}
+r3_r2.z <- r3_r2.y %>%
+  filter(!is.na(student_ssid.y.y))
+nrow(r3_r2.z)
+
+#write.csv(r3_r2, "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 3/R3_R2.csv")
+
+#nrow(r3_r2.y) # R3
+
+#write.csv(r3_r2.z, "/#P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 3/R3_R2.csv", na="")
+
+#library(writexl)
+#write.csv(r3_r2.y, "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 3/R3_R2 (all data).csv", na = "")
+```
+
+# Check for Duplicates, Remove extra columns
+```{r}
+r3_r2.z1 <- r3_r2.z %>%
+  select(
+    -c(student_ssid.y.y, number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021.x:sy21_22_student_withdrawal_date_mm_dd_yyyy.y))
+
+colnames(r3_r2.z1)<-gsub(".x", "", colnames(r3_r2.z1))
+
+#write.csv(r3_r2.y, "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 3/R3_R2 (only both, all columns).csv", na="")
+
+View(r3_r2.z1)
+
+```
+
+# Sum R1 and R3
+```{r}
+r1 <- r1.1
+r2 <- r2.1
+r3 <- r3.1
+
+r1$number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022 <- 0
+r1$number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022 <- 0
+r1$number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022 <- 0
+
+r1$student_ssid.y <- NA
+r1$student_ssid.y <- r1$student_ssid
+
+#left join r1 and r2 on ssid (243 rows match)
+r3_r1 <- r3 %>% 
+  left_join(r1, by = "student_ssid") #%>% dplyr::filter(r2 %in% NA)##
+
+names(r3_r1)
+r3_r1.y <- r3_r1 %>%
+  mutate(september= 
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021.x +
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021.y,october =
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021.x + 
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021.y, november=
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021.x +
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021.y,
+december =
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021.x +
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021.y,
+january =
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022.x +
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022.y,
+february =
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022.x +
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022.y,
+march =
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022.x +
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022.y,
+april =
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022.x +
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022.y,
+may =
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022.x +
+number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022.y) %>%
+  mutate(comments = comments.x)
+
+View(r3_r1.y)
+```
+
+# Students in Both R1 & R3
+```{r}
+#r3_r1.z <- r3_r1.y %>%
+#  filter(student_ssid != r3_r2.y$student_ssid.y.y)
+
+
+r3_r1.z <- r3_r1.y %>%
+  filter(!is.na(student_ssid.y.y))
+
+nrow(r3_r1.z)
+
+# Check for duplicates
+r3_r1.z %>% 
+  group_by(student_ssid) %>% 
+  summarise(n = n()) %>% View()
+```
+
+# Subset 2: Students in R1 & R3 but not in R2
+```{r}
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+r3_r1.a <- r3_r1.z %>%
+  filter(student_ssid.y.y %!in% r2$student_ssid)
+
+View(r3_r1.a)
+#write.csv(r3_r1.z, "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 3/R3_R1.csv", na="")
+
+
+#r3_r1 <- r3_r1.a %>%
+#  select(
+#    -c(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021.x:number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022.y, lea_code.y:sy21_22_student_withdrawal_date_mm_dd_yyyy.y))
+
+
+#colnames(r3_r1)<-gsub(".x", "", colnames(r3_r1))
+
+#View(r3_r1)
+
+
+```
+
+# Combine into final R3 file
+```{r}
+# Clean up Subset 1
+r3_r2 <- r3_r2.z %>%
+  select(
+    -c(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021.x:number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022.y, lea_code.y:sy21_22_student_withdrawal_date_mm_dd_yyyy.y, student_ssid.y.y))
+
+colnames(r3_r2)<-gsub(".x", "", colnames(r3_r2))
+nrow(r3_r2)
+names(r3_r2)
+
+# Clean up Subset 2
+r3_r1 <- r3_r1.a %>%
+  select(
+    -c(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021.x:number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022.y, lea_code.y:sy21_22_student_withdrawal_date_mm_dd_yyyy.y, student_ssid.y.y))
+
+colnames(r3_r1)<-gsub(".x", "", colnames(r3_r1))
+
+nrow(r3_r1)
+
+# Combine subsets
+set <- rbind(r3_r1,r3_r2)
+
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+# Filter R3 by SSIDs in subset
+r3 <- r3.1
+r3.x <- r3 %>%
+  filter(student_ssid %!in% set$student_ssid)
+
+# Make column names of R3 match
+r3.xx <- r3.x %>%
+  mutate(september= number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021, 
+         october = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_october_2021,
+         november = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_november_2021,
+         december  =number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_december_2021,
+         january  = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_january_2022,
+         february  = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_february_2022,
+         march  = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_march_2022,
+         april  = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_april_2022,
+         may = number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022) %>%
+  select(-c(number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_september_2021:number_of_days_student_attended_school_virtually_or_remotely_due_to_covid_19_in_may_2022))
+
+#comp <- compare_df_cols(r3_r1, r3_r2, r3.xx)
+#View(comp)
+
+# Combine subset data with R3
+final <- rbind(r3.xx, set)
+
+nrow(final) #edit check 
+
+#write.csv(r3_final3, "P:/1_Internal/Reports/CNP (all programs)/COVID-19/PEBT SY2022/SFA Submissions SY2022/1_PEBT 3/R3_final_jw.csv", na="")
+```
+
+
