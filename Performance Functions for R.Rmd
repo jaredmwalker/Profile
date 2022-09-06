@@ -1,0 +1,179 @@
+```{r}
+# Create the data frame
+col1 <- runif (12^5, 0, 2)
+col2 <- rnorm (12^5, 0, 2)
+col3 <- rpois (12^5, 3)
+col4 <- rchisq (12^5, 2)
+df <- data.frame (col1, col2, col3, col4)
+
+library("simstudy")
+```
+
+```{sql connection = environ}
+
+SELECT col1
+FROM df
+
+```
+
+```{r}
+# Original R code: Before vectorization and pre-allocation
+system.time({
+  for (i in 1:nrow(df)) { # for every row
+    if ((df[i, 'col1'] + df[i, 'col2'] + df[i, 'col3'] + df[i, 'col4']) > 4) { # check if > 4
+      df[i, 5] <- "greater_than_4" # assign 5th column
+    } else {
+      df[i, 5] <- "lesser_than_4" # assign 5th column
+    }
+  }
+})
+```
+
+```{r}
+# after vectorization and pre-allocation
+output <- character (nrow(df)) # initialize output vector
+system.time({
+  for (i in 1:nrow(df)) {
+    if ((df[i, 'col1'] + df[i, 'col2'] + df[i, 'col3'] + df[i, 'col4']) > 4) {
+      output[i] <- "greater_than_4"
+    } else {
+      output[i] <- "lesser_than_4"
+    }
+  }
+df$output})
+```
+
+```{r}
+# after vectorization and pre-allocation, taking the condition checking outside the loop.
+output <- character (nrow(df))
+condition <- (df$col1 + df$col2 + df$col3 + df$col4) > 4  # condition check outside the loop
+system.time({
+  for (i in 1:nrow(df)) {
+    if (condition[i]) {
+      output[i] <- "greater_than_4"
+    } else {
+      output[i] <- "lesser_than_4"
+    }
+  }
+  df$output <- output
+})
+```
+
+```{r}
+output <- character(nrow(df))
+condition <- (df$col1 + df$col2 + df$col3 + df$col4) > 4
+system.time({
+  for (i in (1:nrow(df))[condition]) {  # run loop only for true conditions
+    if (condition[i]) {
+      output[i] <- "greater_than_4"
+    } else {
+      output[i] <- "lesser_than_4"
+    }
+  }
+  df$output })
+```
+
+```{r}
+
+system.time({
+  output <- ifelse ((df$col1 + df$col2 + df$col3 + df$col4) > 4, "greater_than_4", "lesser_than_4")
+  df$output <- output
+})
+```
+
+```{r}
+# Thanks to Gabe Becker
+system.time({
+  want = which(rowSums(df) > 4)
+  output = rep("less than 4", times = nrow(df))
+  output[want] = "greater than 4"
+}) 
+# nrow = 3 Million rows (approx)
+   user  system elapsed 
+  0.396   0.074   0.481 
+```
+
+```{r}
+# apply family
+system.time({
+  myfunc <- function(x) {
+    if ((x['col1'] + x['col2'] + x['col3'] + x['col4']) > 4) {
+      "greater_than_4"
+    } else {
+      "lesser_than_4"
+    }
+  }
+  output <- apply(df[, c(1:4)], 1, FUN=myfunc)  # apply 'myfunc' on every row
+  df$output <- output
+})
+```
+
+```{r}
+# byte code compilation
+library(compiler)
+myFuncCmp <- cmpfun(myfunc)
+system.time({
+  output <- apply(df[, c (1:4)], 1, FUN=myFuncCmp)
+})
+```
+
+```{r}
+
+library(Rcpp)
+sourceCpp("MyFunc.cpp")
+system.time (output <- myFunc(df)) # see Rcpp function below
+```
+
+```{r}
+// Source for MyFunc.cpp
+#include 
+using namespace Rcpp;
+// [[Rcpp::export]]
+CharacterVector myFunc(DataFrame x) {
+  NumericVector col1 = as(x["col1"]);
+  NumericVector col2 = as(x["col2"]);
+  NumericVector col3 = as(x["col3"]);
+  NumericVector col4 = as(x["col4"]);
+  int n = col1.size();
+  CharacterVector out(n);
+  for (int i=0; i 4){
+      out[i] = "greater_than_4";
+    } else {
+      out[i] = "lesser_than_4";
+    }
+  }
+  return out;
+}
+```
+
+```{r}
+library(fabricatr)
+library(wakefield)
+
+survey_experiment_df <- fabricate(
+  N = 50,
+  treatment = draw_binary(prob = 0.5, N = N),
+  age = age(n = N),
+  race = race(n = N),
+  sex = sex(n = N),
+)
+
+View(survey_experiment_df)
+
+survey_experiment_df <- r_data_frame(
+  n = 50,
+  age,
+  race,
+  sex)
+
+fabricatr_df <- fabricate(
+  data = survey_experiment_df,
+  treatment = draw_binary(prob = 0.5, N = N)
+)
+
+fabricatr_df
+
+install.packages("conjurer")
+
+library(conjurer)
+```
